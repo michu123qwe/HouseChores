@@ -1,0 +1,8 @@
+<h1>Sign Up</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+    <br><br>
+    <a href="{% url 'tasks:index' %}">Back to main page.</a>
+</form>
