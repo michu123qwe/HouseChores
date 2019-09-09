@@ -1,7 +1,12 @@
-{% if task_list %}
-    {% for task in task_list %}
-        <li>
-            {{ task.caption }}
+
+{% if user.is_authenticated %}
+    Welcome {{ user.username }}
+    <br>
+    <a href="{% url 'accounts:logout' %} ">Logout</a>
+    <br><br>
+    {% if task_list %}
+        {% for task in task_list %}
+            Zadanie: {{ task.caption }}
             <br>
             Zadane przez: {{ task.task_giver }}
             <br>
@@ -18,7 +23,12 @@
                 <input type="button" value="Zrobione">
             {% endif %}
             <br><br><br>
-        </li>
-    {% endfor %}
-
+        {% endfor %}
+    {% endif %}
+{% else %}
+    You need to be logged in.
+    <br><br>
+    <a href="{% url 'accounts:login' %}">Log In</a>
+    <br>
+    Do not have an account? <a href="{% url 'accounts:signup' %}">Register</a>
 {% endif %}
