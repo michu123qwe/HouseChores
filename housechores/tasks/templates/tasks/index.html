@@ -1,0 +1,24 @@
+{% if task_list %}
+    {% for task in task_list %}
+        <li>
+            {{ task.caption }}
+            <br>
+            Zadane przez: {{ task.task_giver }}
+            <br>
+            Dodane: {{ task.pub_date }}
+            <br>
+            Aktywne do: {{ task.due_date }}
+            <br>
+            {% if task.task_done_by %}
+                Zrobione przez: {{ task.task_done_by }}
+                <br>
+                {{ task.task_done_date }}
+            {% else %}
+                Status: do zrobienia
+                <input type="button" value="Zrobione">
+            {% endif %}
+            <br><br><br>
+        </li>
+    {% endfor %}
+
+{% endif %}
