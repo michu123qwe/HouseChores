@@ -6,31 +6,34 @@
     <br><br>
     {% if task_list %}
         {% for task in task_list %}
-            Zadanie: {{ task.caption }}
+            Task: {{ task.caption }}
             <br>
-            Zadane przez: {{ task.task_giver }}
+            Given by: {{ task.task_giver }}
             <br>
-            Dodane: {{ task.pub_date }}
+            Added: {{ task.pub_date }}
             <br>
-            Aktywne do: {{ task.due_date }}
+            Due to: {{ task.due_date }}
             <br>
-            {% if task.task_done_by %}
-
-                Zrobione przez: {{ task.task_done_by }}
-                <br>
-                {{ task.task_done_date }}
+            Status:
+            {% if task.is_expired %}
+                Expired
             {% else %}
-                Status: do zrobienia
-
-                <form action="{% url 'tasks:complete_task' task.id %}" method="post">
-                {% csrf_token %}
-                 <button type="submit" value="{{ task.id }}">Zrobione</button>
-                </form>
-
-
+                {% if task.task_done_by %}
+                    Done by {{ task.task_done_by }}
+                    <br>
+                    {{ task.task_done_date }}
+                {% else %}
+                    To be done
+                    <form action="{% url 'tasks:complete_task' task.id %}" method="post">
+                    {% csrf_token %}
+                     <button type="submit" value="{{ task.id }}">Done</button>
+                    </form>
+                {% endif %}
             {% endif %}
             <br><br><br>
         {% endfor %}
+    {% else %}
+        No tasks are available.
     {% endif %}
 {% else %}
     You need to be logged in.
