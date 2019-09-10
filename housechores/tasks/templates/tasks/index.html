@@ -15,12 +15,19 @@
             Aktywne do: {{ task.due_date }}
             <br>
             {% if task.task_done_by %}
+
                 Zrobione przez: {{ task.task_done_by }}
                 <br>
                 {{ task.task_done_date }}
             {% else %}
                 Status: do zrobienia
-                <input type="button" value="Zrobione">
+
+                <form action="{% url 'tasks:complete_task' task.id %}" method="post">
+                {% csrf_token %}
+                 <button type="submit" value="{{ task.id }}">Zrobione</button>
+                </form>
+
+
             {% endif %}
             <br><br><br>
         {% endfor %}
