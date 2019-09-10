@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 # Create your models here.
@@ -12,3 +13,6 @@ class Task(models.Model):
 
     def __str__(self):
         return '{} by {}'.format(self.caption, self.task_giver)
+
+    def is_expired(self):
+        return not self.task_done_by and self.due_date < timezone.now()
