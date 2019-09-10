@@ -16,7 +16,7 @@ class IndexView(generic.ListView):
 
 def complete_task(request, task_id):
     task = get_object_or_404(Task, pk=task_id)
-    if task.task_done_by or not request.user.is_authenticated():
+    if task.task_done_by or not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('tasks:index'))
 
     task.task_done_by = request.user.username
