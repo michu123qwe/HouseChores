@@ -34,8 +34,9 @@ def complete_task(request, task_id):
 def delete_task(request, task_id):
     task = get_object_or_404(Task, pk=task_id)
 
-    # redirect to index when user is not logged in
-    if not request.user.is_authenticated:
+    # redirect to index when user is not logged in or user does not own this task
+    if not request.user.is_authenticated or \
+            (not request.user.is_superuser and task.task_giver != request.user.username):
         return HttpResponseRedirect(reverse('tasks:index'))
 
     # delete task
