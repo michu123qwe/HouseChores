@@ -13,7 +13,7 @@ class IndexView(generic.ListView):
     template_name = 'tasks/index.html'
 
     def get_queryset(self):
-        return Task.objects.order_by('-due_date')
+        return Task.objects.order_by('due_date')
 
 
 def complete_task(request, task_id):
@@ -27,6 +27,19 @@ def complete_task(request, task_id):
     task.task_done_by = request.user.username
     task.task_done_date = timezone.now()
     task.save()
+
+    return HttpResponseRedirect(reverse('tasks:index'))
+
+
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+
+    # redirect to index when user is not logged in
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('tasks:index'))
+
+    # delete task
+    task.delete()
 
     return HttpResponseRedirect(reverse('tasks:index'))
 
