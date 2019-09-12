@@ -1,44 +1,46 @@
 
 {% if user.is_authenticated %}
-    Welcome {{ user.username }}
-    <br>
-    <a href="{% url 'accounts:logout' %} ">Logout</a>
-    <br><br>
+    Welcome {{ user.username }}<br>
+    <a href="{% url 'accounts:logout' %} ">Logout</a><br>
+    <a href="{% url 'tasks:create_task' %}">Create Task</a><br><br>
+    <center>
     {% if task_list %}
         {% for task in task_list %}
-            Task: {{ task.caption }}
-            <br>
-            Given by: {{ task.task_giver }}
-            <br>
-            Added: {{ task.pub_date }}
-            <br>
-            Due to: {{ task.due_date }}
-            <br>
-            Status:
-            {% if task.is_expired %}
-                Expired
-            {% else %}
-                {% if task.task_done_by %}
-                    Done by {{ task.task_done_by }}
-                    <br>
-                    {{ task.task_done_date }}
-                {% else %}
-                    To be done
+            {% if not task.is_expired and not task.task_done_by %}
+                    Task: {{ task.caption }}<br>
+                    Given by: {{ task.task_giver }}<br>
+                    Added: {{ task.pub_date }}<br>
+                    Due to: {{ task.due_date }}<br>
+                    Status: To be done
                     <form action="{% url 'tasks:complete_task' task.id %}" method="post">
                     {% csrf_token %}
                      <button type="submit" value="{{ task.id }}">Done</button>
-                    </form>
-                {% endif %}
+                    </form><br><br><br>
             {% endif %}
-            <br><br><br>
+        {% endfor %}
+
+        {% for task in task_list %}
+            {% if task.is_expired or task.task_done_by %}
+                Task: {{ task.caption }}<br>
+                Given by: {{ task.task_giver }}<br>
+                Added: {{ task.pub_date }}<br>
+                Due to: {{ task.due_date }}<br>
+                Status:
+                {% if task.is_expired %}
+                    Expired
+                {% elif task.task_done_by%}
+                    Done by {{ task.task_done_by }}<br>
+                    {{ task.task_done_date }}
+                {% endif %}
+                <br><br><br>
+            {% endif %}
         {% endfor %}
     {% else %}
         No tasks are available.
     {% endif %}
+    </center>
 {% else %}
-    You need to be logged in.
-    <br><br>
-    <a href="{% url 'accounts:login' %}">Log In</a>
-    <br>
+    You need to be logged in.<br><br>
+    <a href="{% url 'accounts:login' %}">Log In</a><br>
     Do not have an account? <a href="{% url 'accounts:signup' %}">Register</a>
 {% endif %}
