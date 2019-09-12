@@ -13,9 +13,15 @@
                     Due to: {{ task.due_date }}<br>
                     Status: To be done
                     <form action="{% url 'tasks:complete_task' task.id %}" method="post">
-                    {% csrf_token %}
-                     <button type="submit" value="{{ task.id }}">Done</button>
-                    </form><br><br><br>
+                        {% csrf_token %}
+                         <button type="submit" value="{{ task.id }}">Done</button>
+                    </form>
+                    {% if user.username == task.task_giver or user.is_superuser %}
+                        <form action="{% url 'tasks:delete_task' task.id %}" method="post">
+                            {% csrf_token %}
+                             <button type="submit" value="{{ task.id }}">Delete</button>
+                        </form>
+                    {% endif %}<br><br><br>
             {% endif %}
         {% endfor %}
 
@@ -31,6 +37,12 @@
                 {% elif task.task_done_by%}
                     Done by {{ task.task_done_by }}<br>
                     {{ task.task_done_date }}
+                {% endif %}<br>
+                {% if user.username == task.task_giver or user.is_superuser %}
+                    <form action="{% url 'tasks:delete_task' task.id %}" method="post">
+                        {% csrf_token %}
+                         <button type="submit" value="{{ task.id }}">Delete</button>
+                    </form>
                 {% endif %}
                 <br><br><br>
             {% endif %}
