@@ -17,7 +17,10 @@ class IndexView(generic.ListView):
 
 
 def complete_task(request, task_id):
-    task = get_object_or_404(Task, pk=task_id)
+    try:
+        task = Task.objects.get(pk=task_id)
+    except Task.DoesNotExist:
+        return HttpResponseRedirect(reverse('tasks:index'))
 
     # redirect to index when task can't be completed
     if task.task_done_by or not request.user.is_authenticated or task.is_expired():
