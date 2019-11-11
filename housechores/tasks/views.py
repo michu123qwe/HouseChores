@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from .forms import CreateTaskForm
-import datetime
+import pytz
 
 
 # Create your views here.
@@ -56,18 +56,19 @@ def create_task(request):
     if request.method == 'POST':
         form = CreateTaskForm(request.POST)
         if form.is_valid():
-
             # create convenient format for date
             date, time = request.POST['due_date'].split(' ')
             day, month, year = date.split('/')
             hour, minute = time.split(':')
-            due_date = '{}-{}-{} {}:{}'.format(year, month, day, hour, minute)
 
             # create new task
             task = Task()
             task.caption = request.POST['caption']
             task.pub_date = timezone.now()
-            task.due_date = due_date
+            task.due_date = timezone.datetime(year=int(year), month=int(month),
+                                              day=int(day), hour=int(hour),
+                                              minute=int(minute),
+                                              tzinfo=pytz.timezone('Europe/Warsaw'))
             task.task_giver = request.user.username
 
             task.save()
@@ -75,4 +76,3 @@ def create_task(request):
 
     form = CreateTaskForm()
     return render(request, 'tasks/create_task.html', {'form': form})
-
