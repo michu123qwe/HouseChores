@@ -34,6 +34,9 @@
                                     {% if task.task_done_by %}
                                         <td>done by {{ task.task_done_by }}</td>
                                         <td><a  class="btn btn-secondary my-2">Complete</a></td>
+                                    {% elif task.is_expired %}
+                                        <td>Expired</td>
+                                        <td><a  class="btn btn-secondary my-2">Complete</a></td>
                                     {% else %}
                                         <td>not completed</td>
                                         <td><a href="{% url 'tasks:complete_task' task.id %}" class="btn btn-primary my-2">Complete</a></td>
