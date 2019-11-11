@@ -6,6 +6,18 @@ from django.utils import timezone
 import datetime
 from django.shortcuts import get_object_or_404
 
+COMPLETE_BUTTON = 'class="btn btn-primary my-2"'
+DELETE_BUTTON = 'class="btn btn-danger my-2"'
+
+
+def create_user(superuser=False):
+    if superuser:
+        return User.objects.create_superuser(
+            username='testuser', password='12345', email='aaa@gmail.com'
+        )
+    else:
+        return User.objects.create_user(username='testuser', password='12345')
+
 
 def create_task(text, status):
     """
@@ -37,20 +49,20 @@ class IndexViewTests(TestCase):
         """
         If there are no tasks, appropriate message is displayed
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         response = self.client.get(reverse('tasks:index'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'No tasks are available.')
+        self.assertNotContains(response, '<td>')
         self.assertQuerysetEqual(response.context['task_list'], [])
 
     def test_display_uncompleted_task(self):
         """
         Uncompleted tasks are displayed
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'uncompleted')
@@ -64,7 +76,7 @@ class IndexViewTests(TestCase):
         """
         Completed tasks are displayed
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'completed')
@@ -78,7 +90,7 @@ class IndexViewTests(TestCase):
         """
         Expired tasks are displayed
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'expired')
@@ -92,7 +104,7 @@ class IndexViewTests(TestCase):
         """
         Both completed and uncompleted (sorted by due_date) tasks are displayed
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'completed')
@@ -107,7 +119,7 @@ class IndexViewTests(TestCase):
         """
         Both completed and expired (sorted by due_date) tasks are displayed
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'completed')
@@ -122,7 +134,7 @@ class IndexViewTests(TestCase):
         """
         Both uncompleted and expired (sorted by due_date) tasks are displayed
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'uncompleted')
@@ -137,7 +149,7 @@ class IndexViewTests(TestCase):
         """
         Completed, uncompleted and expired (sorted by due_date) tasks are displayed
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'completed')
@@ -153,7 +165,7 @@ class IndexViewTests(TestCase):
         """
         Completed task does not contain 'Done' button to complete task.
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'completed')
@@ -166,33 +178,33 @@ class IndexViewTests(TestCase):
         """
         Expired task does not contain 'Done' button to complete task.
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'expired')
         response = self.client.get(reverse('tasks:index'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, 'Done</button>')
+        self.assertContains(response, COMPLETE_BUTTON)
 
     def test_uncompleted_task_can_be_completed(self):
         """
         Uncompleted task contains 'Done' button to complete task.
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'uncompleted')
         response = self.client.get(reverse('tasks:index'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Done</button>')
+        self.assertContains(response, COMPLETE_BUTTON)
 
     def test_can_create_task(self):
         """
         Logged user can create tasks.
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         response = self.client.get(reverse('tasks:index'))
@@ -202,39 +214,37 @@ class IndexViewTests(TestCase):
         """
         Superuser can delete other users' tasks
         """
-        self.user = User.objects.create_superuser(
-            username='testuser', password='12345', email='aaa@gmail.com'
-        )
+        self.user = create_user(superuser=True)
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'completed')
 
         response = self.client.get(reverse('tasks:index'))
-        self.assertContains(response, 'Delete</button>')
+        self.assertContains(response, DELETE_BUTTON)
 
     def test_user_delete_owned_task(self):
         """
         User can delete task created by self
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('testuser', 'completed')
 
         response = self.client.get(reverse('tasks:index'))
-        self.assertContains(response, 'Delete</button>')
+        self.assertContains(response, DELETE_BUTTON)
 
     def test_user_cannot_delete_not_owned_task(self):
         """
         User cannot delete task not created by self
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         create_task('a', 'completed')
 
         response = self.client.get(reverse('tasks:index'))
-        self.assertNotContains(response, 'Delete</button>')
+        self.assertNotContains(response, DELETE_BUTTON)
 
 
 # complete_task tests
@@ -254,7 +264,7 @@ class CompleteTaskViewTests(TestCase):
         """
         Logged user can complete uncompleted tasks.
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         task = create_task('a', 'uncompleted')
@@ -268,7 +278,7 @@ class CompleteTaskViewTests(TestCase):
         """
         Logged user cannot complete completed tasks.
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         task = create_task('a', 'completed')
@@ -282,7 +292,7 @@ class CompleteTaskViewTests(TestCase):
         """
         Logged user cannot complete expired tasks.
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         task = create_task('a', 'expired')
@@ -308,7 +318,7 @@ class DeleteTaskViewTests(TestCase):
         """
         User cannot delete not owned task
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         task = create_task('a', 'uncompleted')
@@ -320,7 +330,7 @@ class DeleteTaskViewTests(TestCase):
         """
         User can delete owned task
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         task = create_task('testuser', 'uncompleted')
@@ -332,9 +342,7 @@ class DeleteTaskViewTests(TestCase):
         """
         Superuser can delete not owned task
         """
-        self.user = User.objects.create_superuser(
-            username='testuser', password='12345', email='aaa@gmail.com'
-        )
+        self.user = create_user(superuser=True)
         self.client.login(username='testuser', password='12345')
 
         task = create_task('a', 'uncompleted')
@@ -351,7 +359,7 @@ class CreateTaskViewTests(TestCase):
         """
         caption = 'a'
         date = timezone.now()
-        self.client.post(reverse('tasks:create_task', args=(caption, date,)))
+        self.client.post(reverse('tasks:create_task'), {'caption': caption, 'due_date': date})
 
         self.assertEqual(Task.objects.count(), 0)
 
@@ -359,13 +367,14 @@ class CreateTaskViewTests(TestCase):
         """
         Logged user can create tasks.
         """
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = create_user()
         self.client.login(username='testuser', password='12345')
 
         caption = 'a'
-        date = timezone.now()
-        self.client.post(reverse('tasks:create_task', args=(caption, date,)))
+        # date = timezone.now()
+        date = timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M')
 
+        self.client.post(reverse('tasks:create_task'), {'caption': caption, 'due_date': date})
         self.assertEqual(Task.objects.count(), 1)
 
 
