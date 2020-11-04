@@ -1,7 +1,7 @@
 # HouseChores
 
 **Technologies**: Python3, Django  
-**Description**: A wep app that lets you authenticate and add/delete/complete tasks.
+**Description**: A web app that lets you authenticate and add/delete/complete tasks.
 
 Register yourself and your family members and share house chores.
 
